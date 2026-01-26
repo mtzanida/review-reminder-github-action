@@ -6,7 +6,7 @@ This GitHub Action helps manage pull request reviews by automatically reminding 
 
 ## Features
 
-- **Automatic Reminder**: Sends a reminder to reviewers who haven't submitted feedback after an hour.
+- **Automatic Reminder**: Sends a reminder to reviewers who haven't submitted feedback after 24 hours, then again after 3 days.
 - **Daily Checks**: Scheduled to check for open pull requests every day.
 - **Customizable**: Easy to configure based on your repository needs.
 
@@ -68,7 +68,7 @@ Make sure to create a GitHub token and add it to your repository secrets as `GIT
 
 ## Usage
 
-Once the action is set up, it will automatically check for open pull requests and send reminders to reviewers who haven't provided feedback within an hour.
+Once the action is set up, it will automatically check for open pull requests and send reminders to reviewers who haven't provided feedback within 24 hours, and again after 3 days.
 
 ### Example of Reminder Message
 
