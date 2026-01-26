@@ -21,7 +21,28 @@ git clone https://github.com/mtzanida/review-reminder-github-action.git
 cd review-reminder-github-action
 ```
 
-### 2. Set Up the GitHub Action
+### 2. Local Development Setup
+
+Install dependencies and set up pre-commit hooks:
+
+```bash
+npm install
+npx husky init
+```
+
+Run tests locally:
+
+```bash
+npm test
+```
+
+Run linting:
+
+```bash
+npm run lint
+```
+
+### 3. Set Up the GitHub Action
 
 Create a workflow file in your repository's `.github/workflows` directory. You can name it `pr-reminder.yml`.
 
@@ -58,11 +79,11 @@ jobs:
         run: node .github/script.js
 ```
 
-### 3. Add the Reminder Script
+### 4. Add the Reminder Script
 
 Place the script located at `.github/script.js` in your repository. This script handles fetching open pull requests, identifying reviewers, and posting reminders.
 
-### 4. Configure GitHub Token
+### 5. Configure GitHub Token
 
 Make sure to create a GitHub token and add it to your repository secrets as `GITHUB_TOKEN`. This is necessary for the action to authenticate API requests.
 
