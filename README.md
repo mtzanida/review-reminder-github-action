@@ -45,14 +45,12 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "20"
       
       - name: Install dependencies
-        run: |
-          echo '{}' > package.json
-          npm install moment @octokit/action
+        run: npm install @octokit/rest
       
       - name: Run reminder script
         env:
@@ -88,7 +86,6 @@ Contributions are welcome! If you have suggestions or improvements, feel free to
 ## Acknowledgements
 
 - [Octokit](https://github.com/octokit/octokit.js) for GitHub API interaction.
-- [Moment.js](https://momentjs.com/) for date manipulation.
 
 ## Contact
 

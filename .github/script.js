@@ -1,74 +1,36 @@
 #!/usr/bin/env node
 
-const moment = require("moment");
-const { Octokit } = require("@octokit/action");
-const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
-const repo = process.env.GITHUB_REPOSITORY.split("/")[1];
+const { Octokit } = require("@octokit/rest");
+const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function run() {
   console.log("Fetching open pull requests...");
-  const prs = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
-    owner: owner,
-    repo: repo,
-    state: "open",
-  });
-  console.log("Open pull requests fetched:", prs.data.length);
+  const { data: prs } = await octokit.pulls.list({ owner, repo, state: "open" });
+  console.log("Open pull requests fetched:", prs.length);
 
-  for (const pr of prs.data) {
+  for (const pr of prs) {
     console.log(`Processing pull request #${pr.number}...`);
-    console.log(`Fetching reviews for pull request #${pr.number}`);
+    
+    const hoursSinceCreated = (Date.now() - new Date(pr.created_at)) / (1000 * 60 * 60);
+    
+    if (hoursSinceCreated < 1) continue;
 
-    const reviews = await octokit.request(
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
-      {
-        owner: owner,
-        repo: repo,
-        pull_number: pr.number,
-      }
-    );
-    // Fetch the list of potential reviewers
-    const potentialReviewersResponse = await octokit.request(
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
-      {
-        owner: owner,
-        repo: repo,
-        pull_number: pr.number,
-      }
-    );
-    const potentialReviewers = potentialReviewersResponse.data.users.map(
-      (user) => user.login
-    );
+    const { data: reviews } = await octokit.pulls.listReviews({ owner, repo, pull_number: pr.number });
+    const { data: { users: requestedReviewers } } = await octokit.pulls.listRequestedReviewers({ owner, repo, pull_number: pr.number });
 
-    // Find the reviewers who haven't made a review
-    const reviewers = reviews.data.map((review) => review.user.login);
-    const reviewersWhoHaventReviewed = potentialReviewers.filter(
-      (reviewer) => !reviewers.includes(reviewer)
-    );
+    const reviewers = new Set(reviews.map(r => r.user.login));
+    const reviewersWhoHaventReviewed = requestedReviewers.filter(u => !reviewers.has(u.login));
 
-    console.log(
-      `Reviewers who haven't reviewed the pull request #${pr.number}:`,
-      reviewersWhoHaventReviewed
-    );
-    const joinedAt = reviewersWhoHaventReviewed[0].joined_at;
-    const joinedAtTime = moment(joinedAt);
-    const now = moment();
-    const hoursSinceJoined = now.diff(joinedAtTime, "hours");
-    console.log(`The approver has been joined for ${hoursSinceJoined} hours.`);
+    console.log(`Reviewers who haven't reviewed PR #${pr.number}:`, reviewersWhoHaventReviewed.map(u => u.login));
 
-    if (hoursSinceJoined > 1) {
-      reviewersWhoHaventReviewed.forEach(async (reviewer, index) => {
-        // Mention the reviewer in a comment on the pull request
-        await octokit.request(
-          "POST /repos/{owner}/{repo}/issues/{issue_number}/comments",
-          {
-            owner: owner,
-            repo: repo,
-            issue_number: pr.number,
-            body: `Hi @${reviewer}, don't forget to check this PR.`,
-          }
-        );
+    for (const reviewer of reviewersWhoHaventReviewed) {
+      await octokit.issues.createComment({
+        owner,
+        repo,
+        issue_number: pr.number,
+        body: `Hi @${reviewer.login}, don't forget to check this PR.`,
       });
     }
   }
