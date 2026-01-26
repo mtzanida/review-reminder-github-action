@@ -10,6 +10,24 @@ This GitHub Action helps manage pull request reviews by automatically reminding 
 - **Daily Checks**: Scheduled to check for open pull requests every day.
 - **Customizable**: Easy to configure based on your repository needs.
 
+## Project Structure
+
+```
+.
+├── src/
+│   └── reminder.js           # Main reminder script
+├── tests/
+│   └── reminder.test.js      # Local test suite
+├── config/
+│   └── eslint.config.js      # ESLint configuration
+├── .github/
+│   └── workflows/
+│       └── pr-reminder.yml   # GitHub Actions workflow
+├── .husky/
+│   └── pre-commit            # Pre-commit hooks
+└── package.json              # Dependencies and scripts
+```
+
 ## Getting Started
 
 To use this action in your GitHub repository, follow these steps:
@@ -76,16 +94,60 @@ jobs:
       - name: Run reminder script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/script.js
+        run: node src/reminder.js
 ```
 
 ### 4. Add the Reminder Script
 
-Place the script located at `.github/script.js` in your repository. This script handles fetching open pull requests, identifying reviewers, and posting reminders.
+Place the script located at `src/reminder.js` in your repository. This script handles fetching open pull requests, identifying reviewers, and posting reminders.
 
 ### 5. Configure GitHub Token
 
 Make sure to create a GitHub token and add it to your repository secrets as `GITHUB_TOKEN`. This is necessary for the action to authenticate API requests.
+
+## Testing
+
+### Local Testing
+
+The project includes a local test suite that simulates the reminder logic without making actual API calls.
+
+**Run tests:**
+```bash
+npm test
+```
+
+**What the test does:**
+- Creates mock PRs with different ages (25 hours old, 4 days old)
+- Simulates the reminder logic for each PR
+- Verifies that reminders are sent at the correct intervals:
+  - First reminder: After 24 hours
+  - Second reminder: After 3 days (if first reminder was already sent)
+
+**Example output:**
+```
+🧪 Running local test...
+
+PR #1: Test PR - 25 hours old
+  Age: 1.0 days
+  ✅ First reminder would be sent to @test-reviewer
+
+PR #2: Test PR - 4 days old
+  Age: 4.0 days
+  ✅ Second reminder would be sent to @test-reviewer
+
+✅ Test completed successfully!
+```
+
+### Pre-commit Hooks
+
+The project uses Husky to run automated checks before each commit:
+- **Linting**: Ensures code quality with ESLint
+- **Testing**: Runs the test suite to verify logic
+
+These checks run automatically when you commit. To bypass (not recommended):
+```bash
+git commit --no-verify
+```
 
 ## Usage
 
