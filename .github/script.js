@@ -19,7 +19,7 @@ async function run() {
     if (hoursSinceCreated < 24) continue;
 
     const { data: reviews } = await octokit.pulls.listReviews({ owner, repo, pull_number: pr.number });
-    const { data: { users: requestedReviewers } } = await octokit.pulls.listRequestedReviewers({ owner, repo, pull_number: pr.number });
+    const { data: { users: requestedReviewers = [] } } = await octokit.pulls.listRequestedReviewers({ owner, repo, pull_number: pr.number });
     const { data: comments } = await octokit.issues.listComments({ owner, repo, issue_number: pr.number });
 
     const reviewers = new Set(reviews.map(r => r.user.login));
