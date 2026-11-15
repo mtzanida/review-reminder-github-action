@@ -1,5 +1,3 @@
-
-```markdown
 # Review Reminder GitHub Action
 
 This GitHub Action helps manage pull request reviews by automatically reminding reviewers who have not yet provided feedback. The action runs daily or can be triggered on demand, ensuring timely reviews and enhancing collaboration within your team.
@@ -173,6 +171,4 @@ Contributions are welcome! If you have suggestions or improvements, feel free to
 ## Contact
 
 For questions or suggestions, please open an issue or contact me via GitHub.
-
-```
 
